@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2026 KitFind Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+ADDITIONAL TERMS — AUTHORIZED USE ONLY
+
+This software is intended solely for authorized security assessment purposes,
+including but not limited to:
+  - System administrators assessing infrastructure they own or manage
+  - Security researchers operating under an authorized bug bounty program
+  - Penetration testers operating under a signed statement of work
+
+The authors and contributors accept no liability for misuse of this software.
+Users are solely responsible for ensuring they have proper authorization
+before scanning any system, network, or domain. Unauthorized use may violate
+computer misuse laws in your jurisdiction.

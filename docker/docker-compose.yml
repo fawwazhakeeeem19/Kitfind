@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  kitfind:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: kitfind:latest
+    container_name: kitfind
+    volumes:
+      - ./reports:/home/kitfind/kitfind-reports
+    environment:
+      - KITFIND_REPORT_OUTPUT_DIR=/home/kitfind/kitfind-reports
+    stdin_open: true
+    tty: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

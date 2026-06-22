@@ -1,0 +1,22 @@
+
+
+
+app:
+  name: KitFind
+  version: "1.0.0"
+
+scanner:
+  timeout: 30s
+  max_concurrency: 30
+  user_agent: "KitFind/1.0 (authorized reconnaissance tool)"
+  dns_resolvers:
+    - "8.8.8.8:53"
+    - "1.1.1.1:53"
+    - "9.9.9.9:53"
+  follow_redirect: true
+
+report:
+  output_dir: "./kitfind-reports"
+
+logging:
+  level: "info"

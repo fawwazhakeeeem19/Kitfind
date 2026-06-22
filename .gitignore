@@ -1,0 +1,27 @@
+# Binary
+kitfind
+kitfind.exe
+dist/
+
+# Reports
+kitfind-reports/
+
+# Config (user-specific)
+.env
+*.local.yaml
+
+# Test coverage
+coverage.out
+coverage.html
+
+# Go
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store

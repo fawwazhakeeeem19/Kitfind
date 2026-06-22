@@ -1,0 +1,196 @@
+name: KitFind CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+env:
+  GO_VERSION: "1.22"
+  CGO_ENABLED: 0
+
+jobs:
+
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          args: --timeout=5m
+
+      - name: Run tests (unit only, no network)
+        run: go test -short -v -race -count=1 ./tests/unit/...
+
+      - name: Run tests with coverage
+        run: |
+          go test -short -coverprofile=coverage.out -covermode=atomic ./...
+          go tool cover -func=coverage.out
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.out
+
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Run Gosec
+        uses: securego/gosec@master
+        with:
+          args: "-no-fail -fmt sarif -out gosec.sarif ./..."
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gosec.sarif
+        if: always()
+
+
+  build:
+    name: Cross-Platform Build
+    runs-on: ubuntu-latest
+    needs: [test]
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          BINARY=kitfind-${{ matrix.goos }}-${{ matrix.goarch }}
+          [ "${{ matrix.goos }}" = "windows" ] && BINARY="${BINARY}.exe"
+          go build -ldflags="-s -w -X main.version=${GITHUB_REF_NAME:-dev}" \
+            -o "dist/${BINARY}" ./cmd/kitfind/
+          echo "Built: dist/${BINARY}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kitfind-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/
+
+
+  docker:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build, docker]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          merge-multiple: true
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*
+          body: |
+
+
+
+            ```bash
+
+            curl -Lo kitfind https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kitfind-linux-amd64
+            chmod +x kitfind && sudo mv kitfind /usr/local/bin/
+
+
+            curl -Lo kitfind https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kitfind-darwin-arm64
+            chmod +x kitfind && sudo mv kitfind /usr/local/bin/
+            ```
+
+
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            docker run --rm ghcr.io/${{ github.repository }}:${{ github.ref_name }} scan example.com
+            ```
+
+            > ⚠️ **Authorized use only.** Only scan systems you own or have written permission to assess.
+          draft: false
+          prerelease: false
