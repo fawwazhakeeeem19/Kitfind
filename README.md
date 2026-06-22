@@ -132,22 +132,22 @@ Runs DNS + SSL + HTTP + Technology fingerprinting in one pass and prints an aggr
 ### Module-Specific Commands
 
 ```bash
-# DNS reconnaissance
+ DNS reconnaissance
 kitfind dns example.com
 kitfind dns example.com --subdomains
 kitfind dns example.com --propagation
 kitfind dns example.com --subdomains --propagation
 
-# SSL/TLS certificate inspection
+ SSL/TLS certificate inspection
 kitfind ssl example.com
 
-# HTTP security header analysis
+ HTTP security header analysis
 kitfind http example.com
 
-# Technology stack fingerprinting
+ Technology stack fingerprinting
 kitfind tech example.com
 
-# Generate a report
+ Generate a report
 kitfind report example.com -f html
 kitfind report example.com -f json
 kitfind report example.com -f csv
@@ -167,7 +167,7 @@ kitfind report example.com -f html -o ./my-reports
 ### Scripting Example
 
 ```bash
-#!/bin/bash
+!/bin/bash
 domains=("site1.com" "site2.com" "site3.com")
 
 for d in "${domains[@]}"; do
@@ -274,16 +274,16 @@ python3 modules/python/analyzer.py example.com --json
 ## 🧪 Testing
 
 ```bash
-# Unit tests only (no network required)
+ Unit tests only (no network required)
 go test -short -v ./tests/unit/...
 
-# Full suite (requires internet)
+ Full suite (requires internet)
 go test -v ./tests/unit/...
 
-# With race detector
+ With race detector
 go test -race ./tests/unit/...
 
-# Coverage report
+ Coverage report
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
