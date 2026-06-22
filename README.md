@@ -67,7 +67,7 @@ Unauthorized scanning of systems you don't own or have permission to test may vi
 ### Build from Source
 
 ```bash
-git clone https://github.com/kitfind/kitfind.git
+git clone https://github.com/fawwazhakeeeem19/Kitfind
 cd kitfind
 
 go mod tidy
